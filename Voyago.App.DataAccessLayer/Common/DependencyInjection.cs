@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Dapper;
+using Microsoft.Extensions.DependencyInjection;
 using Voyago.App.DataAccessLayer.Extensions;
 using Voyago.App.DataAccessLayer.Repositories;
 
@@ -7,6 +8,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddDALServices(this IServiceCollection services, string connectionString)
     {
+        //adding handler to make lists of string to json in the db
+        SqlMapper.AddTypeHandler(new JsonListStringTypeHandler());
         services.AddSingleton<IDbConnectionFactory>(_ => new SqlLiteConnectionFactory(connectionString));
 
         services.AddScoped<IGeneralBookingTaskRepository, GeneralBookingTaskRepository>();
