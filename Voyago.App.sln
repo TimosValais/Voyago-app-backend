@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34928.147
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voyago.App.Api", "Voyago.App.Api\Voyago.App.Api.csproj", "{73A4AF37-A883-4172-BAA2-3625CF75C971}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app", "app", "{DA60D592-4891-4E7A-9CF0-D69AC3DC29B0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "auth", "auth", "{7D2F387D-E667-42ED-801D-0D60DA1BCD3C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voyago.App.BusinessLogic", "Voyago.App.BusinessLogic\Voyago.App.BusinessLogic.csproj", "{D7225AD1-C9BD-4878-8215-5D9FD4ABF197}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voyago.App.DataAccessLayer", "Voyago.App.DataAccessLayer\Voyago.App.DataAccessLayer.csproj", "{A4863346-D668-429D-AA77-7FA7468FC728}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voyago.App.Contracts", "Voyago.App.Contracts\Voyago.App.Contracts.csproj", "{47E9B6F2-C901-4A1B-8F34-5280C2A4636D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{73A4AF37-A883-4172-BAA2-3625CF75C971}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73A4AF37-A883-4172-BAA2-3625CF75C971}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73A4AF37-A883-4172-BAA2-3625CF75C971}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73A4AF37-A883-4172-BAA2-3625CF75C971}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7225AD1-C9BD-4878-8215-5D9FD4ABF197}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7225AD1-C9BD-4878-8215-5D9FD4ABF197}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7225AD1-C9BD-4878-8215-5D9FD4ABF197}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7225AD1-C9BD-4878-8215-5D9FD4ABF197}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4863346-D668-429D-AA77-7FA7468FC728}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4863346-D668-429D-AA77-7FA7468FC728}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4863346-D668-429D-AA77-7FA7468FC728}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4863346-D668-429D-AA77-7FA7468FC728}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47E9B6F2-C901-4A1B-8F34-5280C2A4636D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47E9B6F2-C901-4A1B-8F34-5280C2A4636D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47E9B6F2-C901-4A1B-8F34-5280C2A4636D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47E9B6F2-C901-4A1B-8F34-5280C2A4636D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{73A4AF37-A883-4172-BAA2-3625CF75C971} = {DA60D592-4891-4E7A-9CF0-D69AC3DC29B0}
+		{D7225AD1-C9BD-4878-8215-5D9FD4ABF197} = {DA60D592-4891-4E7A-9CF0-D69AC3DC29B0}
+		{A4863346-D668-429D-AA77-7FA7468FC728} = {DA60D592-4891-4E7A-9CF0-D69AC3DC29B0}
+		{47E9B6F2-C901-4A1B-8F34-5280C2A4636D} = {DA60D592-4891-4E7A-9CF0-D69AC3DC29B0}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {38AC3179-09E2-4338-AFA7-FFCCBF748238}
+	EndGlobalSection
+EndGlobal
