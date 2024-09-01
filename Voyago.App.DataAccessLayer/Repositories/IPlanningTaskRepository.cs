@@ -8,4 +8,6 @@ public interface IPlanningTaskRepository
     Task<bool> InsertAsync(PlanningTask task, CancellationToken cancellationToken = default);
     Task<bool> UpdateAsync(PlanningTask task, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<PlanningTask>> GetByTripIdAsync(Guid tripId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<PlanningTask>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 }

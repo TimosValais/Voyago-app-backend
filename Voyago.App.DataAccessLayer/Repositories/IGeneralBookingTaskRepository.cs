@@ -8,4 +8,7 @@ public interface IGeneralBookingTaskRepository
     Task<bool> InsertAsync(GeneralBookingTask task, CancellationToken cancellationToken = default);
     Task<bool> UpdateAsync(GeneralBookingTask task, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<GeneralBookingTask>> GetByTripIdAsync(Guid tripId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<GeneralBookingTask>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+
 }

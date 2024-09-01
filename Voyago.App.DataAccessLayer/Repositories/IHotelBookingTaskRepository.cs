@@ -8,4 +8,7 @@ public interface IHotelBookingTaskRepository
     Task<bool> InsertAsync(HotelBookingTask task, CancellationToken cancellationToken = default);
     Task<bool> UpdateAsync(HotelBookingTask task, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<HotelBookingTask>> GetByTripIdAsync(Guid tripId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<HotelBookingTask>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+
 }
