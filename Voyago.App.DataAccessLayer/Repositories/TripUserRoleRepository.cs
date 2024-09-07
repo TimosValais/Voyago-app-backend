@@ -14,6 +14,20 @@ internal class TripUserRoleRepository : ITripUserRoleRepository
         _dbConnectionFactory = dbConnectionFactory;
     }
 
+    public async Task<bool> DeleteAsync(Guid tripId, Guid userId, CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            DELETE 
+            FROM TripUserRoles
+            WHERE TripId = @TripId AND UserId = @UserId;
+        ";
+
+        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync();
+        var parameters = new { TripId = tripId, UserId = userId };
+        int result = await connection.ExecuteAsync(sql, parameters);
+        return result > 0;
+    }
+
     public async Task<TripUserRoles?> GetByTripAndUserId(Guid tripId, Guid userId, CancellationToken cancellationToken = default)
     {
         const string sql = @"

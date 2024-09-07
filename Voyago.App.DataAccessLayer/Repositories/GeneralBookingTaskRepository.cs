@@ -89,23 +89,149 @@ public class GeneralBookingTaskRepository : IGeneralBookingTaskRepository
     public async Task<IEnumerable<GeneralBookingTask>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         const string sql = @"
-            SELECT *
-            FROM GeneralBookingTask;
+            SELECT gbt.*, up.*
+            FROM GeneralBookingTask gbt
+            LEFT JOIN TaskUser tu ON gbt.Id = tu.TaskId
+            LEFT JOIN UserProfile up ON tu.UserId = up.Id;
         ";
 
         using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
-        return await connection.QueryAsync<GeneralBookingTask>(sql);
+        Dictionary<Guid, GeneralBookingTask> taskDictionary = [];
+
+        IEnumerable<GeneralBookingTask> tasks = await connection.QueryAsync<GeneralBookingTask, UserProfile, GeneralBookingTask>(
+            sql,
+            (task, user) =>
+            {
+                if (!taskDictionary.TryGetValue(task.Id, out GeneralBookingTask? currentTask))
+                {
+                    currentTask = task;
+                    currentTask.Users = [];
+                    taskDictionary.Add(currentTask.Id, currentTask);
+                }
+
+                if (user != null)
+                {
+                    ((List<UserProfile>)currentTask.Users).Add(user);
+                }
+
+                return currentTask;
+            },
+            splitOn: "Id"
+        );
+
+        return tasks.Distinct();
     }
 
     public async Task<GeneralBookingTask?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         const string sql = @"
-            SELECT *
-            FROM GeneralBookingTask
-            WHERE Id = @Id;
+            SELECT gbt.*, up.*
+            FROM GeneralBookingTask gbt
+            LEFT JOIN TaskUser tu ON gbt.Id = tu.TaskId
+            LEFT JOIN UserProfile up ON tu.UserId = up.Id
+            WHERE gbt.Id = @Id;
         ";
 
         using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
-        return await connection.QueryFirstOrDefaultAsync<GeneralBookingTask>(sql, new { Id = id });
+        GeneralBookingTask? task = null;
+
+        await connection.QueryAsync<GeneralBookingTask, UserProfile, GeneralBookingTask>(
+            sql,
+            (gbt, user) =>
+            {
+                if (task == null)
+                {
+                    task = gbt;
+                    task.Users = [];
+                }
+
+                if (user != null)
+                {
+                    ((List<UserProfile>)task.Users).Add(user);
+                }
+
+                return task;
+            },
+            new { Id = id },
+            splitOn: "Id"
+        );
+
+        return task;
+    }
+
+    public async Task<IEnumerable<GeneralBookingTask>> GetByTripIdAsync(Guid tripId, CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            SELECT gbt.*, up.*
+            FROM GeneralBookingTask gbt
+            LEFT JOIN TaskUser tu ON gbt.Id = tu.TaskId
+            LEFT JOIN UserProfile up ON tu.UserId = up.Id
+            WHERE gbt.TripId = @TripId;
+        ";
+
+        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        Dictionary<Guid, GeneralBookingTask> taskDictionary = [];
+
+        IEnumerable<GeneralBookingTask> tasks = await connection.QueryAsync<GeneralBookingTask, UserProfile, GeneralBookingTask>(
+            sql,
+            (task, user) =>
+            {
+                if (!taskDictionary.TryGetValue(task.Id, out GeneralBookingTask? currentTask))
+                {
+                    currentTask = task;
+                    currentTask.Users = [];
+                    taskDictionary.Add(currentTask.Id, currentTask);
+                }
+
+                if (user != null)
+                {
+                    ((List<UserProfile>)currentTask.Users).Add(user);
+                }
+
+                return currentTask;
+            },
+            new { TripId = tripId },
+            splitOn: "Id"
+        );
+
+        return tasks.Distinct();
+    }
+
+    public async Task<IEnumerable<GeneralBookingTask>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            SELECT gbt.*, up.*
+            FROM GeneralBookingTask gbt
+            INNER JOIN TaskUser tu ON gbt.Id = tu.TaskId
+            INNER JOIN UserProfile up ON tu.UserId = up.Id
+            WHERE tu.UserId = @UserId;
+        ";
+
+        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        Dictionary<Guid, GeneralBookingTask> taskDictionary = [];
+
+        IEnumerable<GeneralBookingTask> tasks = await connection.QueryAsync<GeneralBookingTask, UserProfile, GeneralBookingTask>(
+            sql,
+            (task, user) =>
+            {
+                if (!taskDictionary.TryGetValue(task.Id, out GeneralBookingTask? currentTask))
+                {
+                    currentTask = task;
+                    currentTask.Users = [];
+                    taskDictionary.Add(currentTask.Id, currentTask);
+                }
+
+                if (user != null)
+                {
+                    ((List<UserProfile>)currentTask.Users).Add(user);
+                }
+
+                return currentTask;
+            },
+            new { UserId = userId },
+            splitOn: "Id"
+        );
+
+        return tasks.Distinct();
     }
 }

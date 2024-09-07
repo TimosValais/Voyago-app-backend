@@ -89,23 +89,149 @@ public class PlanningTaskRepository : IPlanningTaskRepository
     public async Task<IEnumerable<PlanningTask>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         const string sql = @"
-            SELECT *
-            FROM PlanningTask;
+            SELECT pt.*, up.*
+            FROM PlanningTask pt
+            LEFT JOIN TaskUser tu ON pt.Id = tu.TaskId
+            LEFT JOIN UserProfile up ON tu.UserId = up.Id;
         ";
 
         using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
-        return await connection.QueryAsync<PlanningTask>(sql);
+        Dictionary<Guid, PlanningTask> taskDictionary = [];
+
+        IEnumerable<PlanningTask> tasks = await connection.QueryAsync<PlanningTask, UserProfile, PlanningTask>(
+            sql,
+            (task, user) =>
+            {
+                if (!taskDictionary.TryGetValue(task.Id, out PlanningTask? currentTask))
+                {
+                    currentTask = task;
+                    currentTask.Users = [];
+                    taskDictionary.Add(currentTask.Id, currentTask);
+                }
+
+                if (user != null)
+                {
+                    ((List<UserProfile>)currentTask.Users).Add(user);
+                }
+
+                return currentTask;
+            },
+            splitOn: "Id"
+        );
+
+        return tasks.Distinct();
     }
 
     public async Task<PlanningTask?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         const string sql = @"
-            SELECT *
-            FROM PlanningTask
-            WHERE Id = @Id;
+            SELECT pt.*, up.*
+            FROM PlanningTask pt
+            LEFT JOIN TaskUser tu ON pt.Id = tu.TaskId
+            LEFT JOIN UserProfile up ON tu.UserId = up.Id
+            WHERE pt.Id = @Id;
         ";
 
         using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
-        return await connection.QueryFirstOrDefaultAsync<PlanningTask>(sql, new { Id = id });
+        PlanningTask? task = null;
+
+        await connection.QueryAsync<PlanningTask, UserProfile, PlanningTask>(
+            sql,
+            (pt, user) =>
+            {
+                if (task == null)
+                {
+                    task = pt;
+                    task.Users = [];
+                }
+
+                if (user != null)
+                {
+                    ((List<UserProfile>)task.Users).Add(user);
+                }
+
+                return task;
+            },
+            new { Id = id },
+            splitOn: "Id"
+        );
+
+        return task;
+    }
+
+    public async Task<IEnumerable<PlanningTask>> GetByTripIdAsync(Guid tripId, CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            SELECT pt.*, up.*
+            FROM PlanningTask pt
+            LEFT JOIN TaskUser tu ON pt.Id = tu.TaskId
+            LEFT JOIN UserProfile up ON tu.UserId = up.Id
+            WHERE pt.TripId = @TripId;
+        ";
+
+        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        Dictionary<Guid, PlanningTask> taskDictionary = [];
+
+        IEnumerable<PlanningTask> tasks = await connection.QueryAsync<PlanningTask, UserProfile, PlanningTask>(
+            sql,
+            (task, user) =>
+            {
+                if (!taskDictionary.TryGetValue(task.Id, out PlanningTask? currentTask))
+                {
+                    currentTask = task;
+                    currentTask.Users = [];
+                    taskDictionary.Add(currentTask.Id, currentTask);
+                }
+
+                if (user != null)
+                {
+                    ((List<UserProfile>)currentTask.Users).Add(user);
+                }
+
+                return currentTask;
+            },
+            new { TripId = tripId },
+            splitOn: "Id"
+        );
+
+        return tasks.Distinct();
+    }
+
+    public async Task<IEnumerable<PlanningTask>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            SELECT pt.*, up.*
+            FROM PlanningTask pt
+            INNER JOIN TaskUser tu ON pt.Id = tu.TaskId
+            INNER JOIN UserProfile up ON tu.UserId = up.Id
+            WHERE tu.UserId = @UserId;
+        ";
+
+        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        Dictionary<Guid, PlanningTask> taskDictionary = [];
+
+        IEnumerable<PlanningTask> tasks = await connection.QueryAsync<PlanningTask, UserProfile, PlanningTask>(
+            sql,
+            (task, user) =>
+            {
+                if (!taskDictionary.TryGetValue(task.Id, out PlanningTask? currentTask))
+                {
+                    currentTask = task;
+                    currentTask.Users = [];
+                    taskDictionary.Add(currentTask.Id, currentTask);
+                }
+
+                if (user != null)
+                {
+                    ((List<UserProfile>)currentTask.Users).Add(user);
+                }
+
+                return currentTask;
+            },
+            new { UserId = userId },
+            splitOn: "Id"
+        );
+
+        return tasks.Distinct();
     }
 }

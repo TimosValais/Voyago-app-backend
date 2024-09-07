@@ -4,7 +4,7 @@ namespace Voyago.App.DataAccessLayer.Entities;
 public class Trip
 {
     public Guid Id { get; set; }
-    public TripStatus Tripstatus { get; set; } = TripStatus.Pending;
+    public TripStatus TripStatus { get; set; } = TripStatus.Pending;
     public virtual IEnumerable<TripUserRoles> TripUsers { get; set; } = [];
     public virtual IEnumerable<TripTask> Tasks { get; set; } = [];
     public decimal Budget { get; set; }

@@ -11,6 +11,8 @@ public class TripTaskService : ITripTaskService
     private readonly IHotelBookingTaskRepository _hotelBookingTaskRepository;
     private readonly IOtherTaskRepository _otherTaskRepository;
     private readonly IPlanningTaskRepository _planningTaskRepository;
+    private readonly IUserProfileRepository _userProfileRepository;
+    private readonly ITaskUserRepository _taskUserRepository;
     private readonly ILogger<TripTaskService> _logger;
 
     public TripTaskService(IFlightBookingTaskRepository flightBookingTaskRepository,
@@ -18,6 +20,8 @@ public class TripTaskService : ITripTaskService
                            IHotelBookingTaskRepository hotelBookingTaskRepository,
                            IOtherTaskRepository otherTaskRepository,
                            IPlanningTaskRepository planningTaskRepository,
+                           IUserProfileRepository userProfileRepository,
+                           ITaskUserRepository taskUserRepository,
                            ILogger<TripTaskService> logger)
     {
         _flightBookingTaskRepository = flightBookingTaskRepository;
@@ -25,10 +29,32 @@ public class TripTaskService : ITripTaskService
         _hotelBookingTaskRepository = hotelBookingTaskRepository;
         _otherTaskRepository = otherTaskRepository;
         _planningTaskRepository = planningTaskRepository;
+        _userProfileRepository = userProfileRepository;
+        _taskUserRepository = taskUserRepository;
         _logger = logger;
 
 
     }
+
+    public async Task<bool> AddUser(Guid userId, Guid taskId, TaskType type, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            UserProfile? user = await _userProfileRepository.GetByIdAsync(userId, cancellationToken);
+            if (user == null)
+            {
+                throw new Exception("User not found!");
+            }
+            return await _taskUserRepository.InsertAsync(new TaskUser() { TaskId = taskId, UserId = userId, });
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            throw;
+        }
+    }
+
     public async Task<bool> DeleteAsync(Guid id, TaskType type, CancellationToken cancellationToken = default)
     {
         try
@@ -149,13 +175,29 @@ public class TripTaskService : ITripTaskService
         }
     }
 
+    public async Task<bool> RemoveUser(Guid userId, Guid taskId, TaskType type, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            UserProfile? user = await _userProfileRepository.GetByIdAsync(userId, cancellationToken);
+            if (user == null)
+            {
+                throw new Exception("User not found!");
+            }
+            return await _taskUserRepository.DeleteAsync(new TaskUser() { TaskId = taskId, UserId = userId, });
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ex.Message);
+            throw;
+        }
+    }
+
     public async Task<bool> UpsertAsync(TripTask task, CancellationToken cancellationToken = default)
     {
         try
         {
-
-
-
             switch (task.Type)
             {
                 case TaskType.GeneralBooking:

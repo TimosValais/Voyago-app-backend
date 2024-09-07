@@ -3,5 +3,6 @@ public enum TripStatus
 {
     Pending,
     OnGoing,
-    Completed
+    Completed,
+    Deleted
 }

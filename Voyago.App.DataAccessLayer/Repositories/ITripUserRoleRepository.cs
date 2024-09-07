@@ -7,4 +7,5 @@ public interface ITripUserRoleRepository
     Task<IEnumerable<TripUserRoles>> GetByTripId(Guid tripId, CancellationToken cancellationToken = default);
     Task<bool> InsertAsync(TripUserRoles tripUserRoles, CancellationToken cancellationToken = default);
     Task<bool> UpdateAsync(TripUserRoles tripUserRoles, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(Guid tripId, Guid userId, CancellationToken cancellationToken = default);
 }

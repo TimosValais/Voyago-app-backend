@@ -10,4 +10,6 @@ public interface ITripTaskService
     Task<bool> UpsertAsync(TripTask task, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(Guid id, TaskType type, CancellationToken cancellationToken = default);
 
+    Task<bool> AddUser(Guid userId, Guid taskId, TaskType type, CancellationToken cancellationToken = default);
+    Task<bool> RemoveUser(Guid userId, Guid taskId, TaskType type, CancellationToken cancellationToken = default);
 }
