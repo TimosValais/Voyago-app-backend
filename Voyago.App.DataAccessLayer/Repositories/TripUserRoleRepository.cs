@@ -22,7 +22,7 @@ internal class TripUserRoleRepository : ITripUserRoleRepository
             WHERE TripId = @TripId AND UserId = @UserId;
         ";
 
-        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync();
+        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
         var parameters = new { TripId = tripId, UserId = userId };
         int result = await connection.ExecuteAsync(sql, parameters);
         return result > 0;
@@ -39,7 +39,7 @@ internal class TripUserRoleRepository : ITripUserRoleRepository
             WHERE TripId = @TripId AND UserId = @UserId;
         ";
 
-        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync();
+        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
         var parameters = new { TripId = tripId, UserId = userId };
         return await connection.QueryFirstOrDefaultAsync<TripUserRoles>(sql, parameters);
     }
@@ -55,8 +55,23 @@ internal class TripUserRoleRepository : ITripUserRoleRepository
             WHERE TripId = @TripId;
         ";
 
-        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync();
+        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
         return await connection.QueryAsync<TripUserRoles>(sql, new { TripId = tripId });
+    }
+
+    public async Task<IEnumerable<TripUserRoles>> GetByUserId(Guid userId, CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            SELECT 
+                UserId, 
+                TripId, 
+                Role
+            FROM TripUserRoles
+            WHERE UserId = @UserId;
+        ";
+
+        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        return await connection.QueryAsync<TripUserRoles>(sql, new { UserId = userId });
     }
 
     public async Task<bool> InsertAsync(TripUserRoles tripUserRoles, CancellationToken cancellationToken = default)
@@ -66,7 +81,7 @@ internal class TripUserRoleRepository : ITripUserRoleRepository
             VALUES (@UserId, @TripId, @Role);
         ";
 
-        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync();
+        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
         var parameters = new
         {
             UserId = tripUserRoles.UserId,
@@ -86,7 +101,7 @@ internal class TripUserRoleRepository : ITripUserRoleRepository
             WHERE UserId = @UserId AND TripId = @TripId;
         ";
 
-        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync();
+        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
         var parameters = new
         {
             UserId = tripUserRoles.UserId,

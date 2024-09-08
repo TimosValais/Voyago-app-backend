@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MassTransit;
+using Microsoft.Extensions.Logging;
+using Voyago.App.Contracts.Messages;
 using Voyago.App.DataAccessLayer.Entities;
 using Voyago.App.DataAccessLayer.Repositories;
 
 namespace Voyago.App.BusinessLogic.Services;
-public class UserProfileService : IUserProfileService
+public class UserProfileService : IUserProfileService, IConsumer<UserRegisterMessage>
 {
     private readonly IUserProfileRepository _userProfileRepository;
     private readonly ILogger<UserProfileService> _logger;
@@ -13,6 +15,24 @@ public class UserProfileService : IUserProfileService
         _userProfileRepository = userProfileRepository;
         _logger = logger;
     }
+
+    public async Task Consume(ConsumeContext<UserRegisterMessage> context)
+    {
+        UserRegisterMessage message = context.Message;
+        if (message == null)
+        {
+            return;
+        }
+        UserProfile userToCreate = new()
+        {
+            Email = message.Email,
+            Id = message.UserId,
+            Name = message.Username
+        };
+        await _userProfileRepository.InsertAsync(userToCreate);
+    }
+
+
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         try

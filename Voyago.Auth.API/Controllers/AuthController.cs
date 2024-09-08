@@ -40,7 +40,7 @@ public class AuthController : ControllerBase
         }
     }
 
-    [HttpPost(ApiRoutes.AuthRoutes.Register)]
+    [HttpPost(ApiRoutes.AuthRoutes.Login)]
     public async Task<IActionResult> Login([FromBody] LoginUserRequest request, CancellationToken cancellationToken)
     {
         try

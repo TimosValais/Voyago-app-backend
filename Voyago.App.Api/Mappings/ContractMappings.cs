@@ -45,6 +45,15 @@ public static class ContractMappings
             PlanningTasks: entity.Tasks.MapToPlanningTaskResponses()
             );
     }
+    public static IEnumerable<TripResponse> MapToResponses(this IEnumerable<Trip> entities, IEnumerable<TripUserRoles> tripUserRoles)
+    {
+        foreach (Trip entity in entities)
+        {
+            TripUserRoles? tripUserRole = tripUserRoles.FirstOrDefault(tur => tur.TripId == entity.Id);
+            EntityValueObjects.TripRole role = tripUserRole?.Role ?? EntityValueObjects.TripRole.Member;
+            yield return entity.MapToResponse(role);
+        }
+    }
 
     public static FlightTaskResponse MapToResponse(this FlightBookingTask task)
     {
@@ -186,25 +195,25 @@ public static class ContractMappings
         };
     }
 
-    public static TripTask MapCreateRequestToEntity(this ITaskRequest request, Guid tripId)
+    public static TripTask MapCreateRequestToEntity(this ITaskRequest request, Guid tripId, Guid taskId)
     {
         TripTask taskToReturn = new();
         switch (request.TaskType)
         {
             case ContractValueObjects.TaskType.GeneralBooking:
-                taskToReturn = (request as CreateGeneralTaskRequest)!.MapToEntity(tripId);
+                taskToReturn = (request as CreateGeneralTaskRequest)!.MapToEntity(tripId, taskId);
                 break;
             case ContractValueObjects.TaskType.HotelBooking:
-                taskToReturn = (request as CreateHotelTaskRequest)!.MapToEntity(tripId);
+                taskToReturn = (request as CreateHotelTaskRequest)!.MapToEntity(tripId, taskId);
                 break;
             case ContractValueObjects.TaskType.TicketBooking:
-                taskToReturn = (request as CreateFlightTaskRequest)!.MapToEntity(tripId);
+                taskToReturn = (request as CreateFlightTaskRequest)!.MapToEntity(tripId, taskId);
                 break;
             case ContractValueObjects.TaskType.Planning:
-                taskToReturn = (request as CreatePlanningTaskRequest)!.MapToEntity(tripId);
+                taskToReturn = (request as CreatePlanningTaskRequest)!.MapToEntity(tripId, taskId);
                 break;
             case ContractValueObjects.TaskType.Other:
-                taskToReturn = (request as CreateOtherTaskRequest)!.MapToEntity(tripId);
+                taskToReturn = (request as CreateOtherTaskRequest)!.MapToEntity(tripId, taskId);
                 break;
         }
         return taskToReturn;
@@ -265,13 +274,24 @@ public static class ContractMappings
                 return EntityValueObjects.TripRole.Member;
         }
     }
-    private static GeneralBookingTask MapToEntity(this CreateGeneralTaskRequest request, Guid tripId)
+
+    public static UserProfile MapToEntity(this UpdateUserProfileRequest request, Guid id)
+    {
+        return new()
+        {
+            Email = request.Email,
+            Name = request.Name,
+            Id = id
+        };
+    }
+
+    private static GeneralBookingTask MapToEntity(this CreateGeneralTaskRequest request, Guid tripId, Guid taskId)
     {
         return new()
         {
             Deadline = request.DeadLine,
             Description = request.Description,
-            Id = Guid.NewGuid(),
+            Id = taskId,
             MoneySpent = request.MoneySpent,
             Name = request.Name,
             Notes = request.Notes,
@@ -280,11 +300,11 @@ public static class ContractMappings
             Type = TaskType.GeneralBooking
         };
     }
-    private static FlightBookingTask MapToEntity(this CreateFlightTaskRequest request, Guid tripId)
+    private static FlightBookingTask MapToEntity(this CreateFlightTaskRequest request, Guid tripId, Guid taskId)
     {
         return new()
         {
-            Id = Guid.NewGuid(),
+            Id = taskId,
             Deadline = request.DeadLine,
             Description = request.Description,
             Name = request.Name,
@@ -296,11 +316,11 @@ public static class ContractMappings
             Type = TaskType.TicketBooking
         };
     }
-    private static HotelBookingTask MapToEntity(this CreateHotelTaskRequest request, Guid tripId)
+    private static HotelBookingTask MapToEntity(this CreateHotelTaskRequest request, Guid tripId, Guid taskId)
     {
         return new()
         {
-            Id = Guid.NewGuid(),
+            Id = taskId,
             Deadline = request.DeadLine,
             Description = request.Description,
             Name = request.Name,
@@ -313,11 +333,11 @@ public static class ContractMappings
             Type = TaskType.HotelBooking
         };
     }
-    private static OtherTask MapToEntity(this CreateOtherTaskRequest request, Guid tripId)
+    private static OtherTask MapToEntity(this CreateOtherTaskRequest request, Guid tripId, Guid taskId)
     {
         return new()
         {
-            Id = Guid.NewGuid(),
+            Id = taskId,
             Deadline = request.DeadLine,
             Description = request.Description,
             Name = request.Name,
@@ -327,11 +347,11 @@ public static class ContractMappings
             Type = TaskType.Other
         };
     }
-    private static PlanningTask MapToEntity(this CreatePlanningTaskRequest request, Guid tripId)
+    private static PlanningTask MapToEntity(this CreatePlanningTaskRequest request, Guid tripId, Guid taskId)
     {
         return new()
         {
-            Id = Guid.NewGuid(),
+            Id = taskId,
             Deadline = request.DeadLine,
             Description = request.Description,
             Name = request.Name,
@@ -430,7 +450,7 @@ public static class ContractMappings
             {
                 continue;
             }
-            yield return (task as FlightBookingTask).MapToResponse();
+            yield return (task as FlightBookingTask)!.MapToResponse();
         }
     }
     private static IEnumerable<GeneralTaskResponse> MapToGeneralTaskResponses(this IEnumerable<TripTask> tasks)
@@ -442,7 +462,7 @@ public static class ContractMappings
             {
                 continue;
             }
-            yield return (task as GeneralBookingTask).MapToResponse();
+            yield return (task as GeneralBookingTask)!.MapToResponse();
         }
     }
     private static IEnumerable<HotelTaskResponse> MapToHotelTaskResponses(this IEnumerable<TripTask> tasks)
@@ -454,7 +474,7 @@ public static class ContractMappings
             {
                 continue;
             }
-            yield return (task as HotelBookingTask).MapToResponse();
+            yield return (task as HotelBookingTask)!.MapToResponse();
         }
     }
     private static IEnumerable<OtherTaskResponse> MapToOtherTaskResponses(this IEnumerable<TripTask> tasks)
@@ -466,7 +486,7 @@ public static class ContractMappings
             {
                 continue;
             }
-            yield return (task as OtherTask).MapToResponse();
+            yield return (task as OtherTask)!.MapToResponse();
         }
     }
     private static IEnumerable<PlanningTaskResponse> MapToPlanningTaskResponses(this IEnumerable<TripTask> tasks)
@@ -478,7 +498,7 @@ public static class ContractMappings
             {
                 continue;
             }
-            yield return (task as PlanningTask).MapToResponse();
+            yield return (task as PlanningTask)!.MapToResponse();
         }
     }
     private static ContractValueObjects.StatusTask MapToContractStatus(this EntityValueObjects.StatusTask status)

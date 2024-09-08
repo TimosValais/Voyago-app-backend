@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Voyago.App.Contracts\Voyago.App.Contracts.csproj" />
     <ProjectReference Include="..\Voyago.Auth.DataAccessLayer\Voyago.Auth.DataAccessLayer.csproj" />
   </ItemGroup>
 

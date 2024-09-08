@@ -1,3 +1,3 @@
 ﻿namespace Voyago.App.Contracts.Requests;
-public record UpdateUserProfileRequest(Guid Id, string Email, string? Name, byte[]? ProfilePicture);
+public record UpdateUserProfileRequest(string Email, string? Name, byte[]? ProfilePicture);
 

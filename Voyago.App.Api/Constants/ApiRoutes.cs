@@ -21,7 +21,7 @@ internal static class ApiRoutes
         public const string GetAll = Base;
         public const string Get = $"{Base}/{{id}}";
         public const string Update = $"{Base}/{{id}}";
-        public const string Create = $"{Base}/{{id}}";
+        public const string Create = Base;
         public const string Delete = $"{Base}/{{id}}";
         public const string GetTasks = $"{Base}/{{id}}/tasks";
         public const string PostTask = $"{Base}/{{id}}/tasks";
@@ -37,5 +37,11 @@ internal static class ApiRoutes
         private const string Base = $"{ApiBase}/tasks";
         public const string AddUser = $"{Base}/{{id}}/users/{{userId}}";
         public const string RemoveUser = $"{Base}/{{id}}/users/{{userId}}";
+    }
+
+    public static class FileRoutes
+    {
+        private const string Base = $"{ApiBase}/files";
+        public const string Get = $"{Base}/{{fileId}}";
     }
 }

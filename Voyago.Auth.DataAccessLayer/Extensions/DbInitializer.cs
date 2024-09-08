@@ -21,13 +21,14 @@ public class DbInitializer : IDbInitializer
     private async Task CreateUserTableAsync(IDbConnection connection)
     {
         string sql = @"
-                CREATE TABLE IF NOT EXISTS User (
-                    Id TEXT PRIMARY KEY,
-                    Username TEXT NOT NULL,
-                    Email TEXT NOT NULL,
-                    PasswordHash TEXT NOT NULL
-                );
-            ";
+        CREATE TABLE IF NOT EXISTS User (
+            Id CHAR(36) PRIMARY KEY,
+            Username TEXT NOT NULL,
+            Email TEXT NOT NULL,
+            PasswordHash TEXT NOT NULL
+        );
+    ";
         await connection.ExecuteAsync(sql);
     }
+
 }

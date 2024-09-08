@@ -52,7 +52,7 @@ public class AuthService : IAuthService
 
         // Generate JWT token
         JwtSecurityTokenHandler tokenHandler = new();
-        byte[] key = Encoding.ASCII.GetBytes(_jwtHashingKey);
+        byte[] key = Encoding.UTF8.GetBytes(_jwtHashingKey);
 
         SecurityTokenDescriptor tokenDescriptor = new()
         {

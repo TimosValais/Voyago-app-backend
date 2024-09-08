@@ -18,7 +18,7 @@ public class TripRepository : ITripRepository
     public async Task<bool> InsertAsync(Trip trip, CancellationToken cancellationToken = default)
     {
         const string sql = @"
-            INSERT INTO Trip (Id, Budget, TripStatus, From, To)
+            INSERT INTO Trip (Id, Budget, TripStatus, `From`, `To`)
             VALUES (@Id, @Budget, @TripStatus, @From, @To);
         ";
 
@@ -42,8 +42,8 @@ public class TripRepository : ITripRepository
             UPDATE Trip
             SET Budget = @Budget,
                 TripStatus = @TripStatus,
-                From = @From,
-                To = @To
+                'From' = @From,
+                'To' = @To
             WHERE Id = @Id;
         ";
 

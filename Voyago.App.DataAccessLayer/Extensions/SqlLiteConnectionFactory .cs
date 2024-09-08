@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using SQLitePCL;
 using System.Data;
 
 namespace Voyago.App.DataAccessLayer.Extensions;
@@ -9,12 +10,19 @@ public class SqlLiteConnectionFactory : IDbConnectionFactory
     public SqlLiteConnectionFactory(string connectionString)
     {
         _connectionString = connectionString;
+        InitializeSQLiteProvider();
     }
 
-    public async Task<IDbConnection> CreateConnectionAsync(CancellationToken token = default)
+    private void InitializeSQLiteProvider()
+    {
+        // Initialize the SQLite provider
+        Batteries.Init();
+    }
+
+    public async Task<IDbConnection> CreateConnectionAsync(CancellationToken cancellationToken = default)
     {
         SqliteConnection connection = new(_connectionString);
-        await connection.OpenAsync(token);
+        await connection.OpenAsync(cancellationToken);
         return connection;
     }
 }

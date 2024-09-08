@@ -10,8 +10,8 @@ public static class DependencyInjection
     {
         //adding handler to make lists of string to json in the db
         SqlMapper.AddTypeHandler(new JsonListStringTypeHandler());
-        services.AddSingleton<IDbConnectionFactory>(_ => new SqlLiteConnectionFactory(connectionString));
-
+        services.AddSingleton<IDbConnectionFactory>(_ => new MySqlConnectionFactory(connectionString));
+        services.AddSingleton<IDbInitializer, DbInitializer>();
         services.AddScoped<IGeneralBookingTaskRepository, GeneralBookingTaskRepository>();
         services.AddScoped<IFlightBookingTaskRepository, FlightBookingTaskRepository>();
         services.AddScoped<IHotelBookingTaskRepository, HotelBookingTaskRepository>();
@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<ITripRepository, TripRepository>();
         services.AddScoped<ITripUserRoleRepository, TripUserRoleRepository>();
         services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+        services.AddScoped<ITaskUserRepository, TaskUserRepository>();
         return services;
     }
 }
