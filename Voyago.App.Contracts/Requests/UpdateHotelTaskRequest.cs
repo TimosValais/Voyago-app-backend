@@ -1,16 +1,11 @@
 ﻿using Voyago.App.Contracts.ValueObjects;
 
 namespace Voyago.App.Contracts.Requests;
-public record UpdateHotelTaskRequest(
-    Guid Id,
-    DateTime? CheckInDate,
-    DateTime? CheckOutDate,
-    string? ContactNo,
-    DateTime DeadLine,
-    string? Description,
-    string Name,
-    decimal MoneySpent,
-    IEnumerable<byte[]> Documents) : ITaskRequest
+public class UpdateHotelTaskRequest : BaseTaskRequest
 {
-    public TaskType TaskType => TaskType.HotelBooking;
-};
+    public override TaskType TaskType => TaskType.HotelBooking;
+    public Guid Id { get; set; }
+    public DateTime? CheckInDate { get; set; }
+    public DateTime? CheckOutDate { get; set; }
+    public string? ContactNo { get; set; }
+}

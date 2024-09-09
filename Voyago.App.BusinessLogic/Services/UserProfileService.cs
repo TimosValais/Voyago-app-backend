@@ -1,5 +1,6 @@
 ﻿using MassTransit;
 using Microsoft.Extensions.Logging;
+using Voyago.App.BusinessLogic.Exceptions;
 using Voyago.App.Contracts.Messages;
 using Voyago.App.DataAccessLayer.Entities;
 using Voyago.App.DataAccessLayer.Repositories;
@@ -77,11 +78,28 @@ public class UserProfileService : IUserProfileService, IConsumer<UserRegisterMes
         try
         {
 
-            Task<UserProfile?>? existingEntity = _userProfileRepository.GetByIdAsync(userProfile.Id, cancellationToken);
+            UserProfile? existingEntity = await _userProfileRepository.GetByIdAsync(userProfile.Id, cancellationToken);
             if (existingEntity is null)
             {
-                throw new Exception("User doesn't exist");
+                throw new Exception("User doesn't exist!");
             }
+            if (!string.Equals(existingEntity.Email, userProfile.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                UserProfile? emailAlreadyExistUser = await _userProfileRepository.GetByEmailAsync(userProfile.Email, cancellationToken);
+                if (emailAlreadyExistUser is not null)
+                {
+                    throw new ConfictException("A user with this email already exists!");
+                }
+            }
+            if (!string.Equals(userProfile.Name, existingEntity.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                UserProfile? usernameAlreadyExistUser = await _userProfileRepository.GetByUsernameAsync(userProfile.Name ?? string.Empty, cancellationToken);
+                if (usernameAlreadyExistUser is not null)
+                {
+                    throw new ConfictException("A user with this username already exists!");
+                }
+            }
+
             return await _userProfileRepository.UpdateAsync(userProfile, cancellationToken);
 
         }

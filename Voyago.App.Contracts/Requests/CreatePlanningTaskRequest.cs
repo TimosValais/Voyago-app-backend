@@ -2,13 +2,8 @@
 
 namespace Voyago.App.Contracts.Requests;
 
-public record CreatePlanningTaskRequest(
-    IEnumerable<string> Steps,
-    DateTime DeadLine,
-    string? Description,
-    string Name,
-    decimal MoneySpent,
-    IEnumerable<byte[]> Documents) : ITaskRequest
+public class CreatePlanningTaskRequest : BaseTaskRequest
 {
-    public TaskType TaskType => TaskType.Planning;
-};
+    public override TaskType TaskType => TaskType.Planning;
+    public IEnumerable<string> Steps { get; set; } = [];
+}

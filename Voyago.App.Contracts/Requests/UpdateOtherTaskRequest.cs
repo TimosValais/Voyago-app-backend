@@ -1,13 +1,9 @@
 ﻿using Voyago.App.Contracts.ValueObjects;
 
 namespace Voyago.App.Contracts.Requests;
-public record UpdateOtherTaskRequest(
-    Guid Id,
-    DateTime DeadLine,
-    string? Description,
-    string Name,
-    decimal MoneySpent,
-    IEnumerable<byte[]> Documents) : ITaskRequest
+public class UpdateOtherTaskRequest : BaseTaskRequest
 {
-    public TaskType TaskType => TaskType.Other;
-};
+    public override TaskType TaskType => TaskType.Other;
+
+    public Guid Id { get; set; }
+}

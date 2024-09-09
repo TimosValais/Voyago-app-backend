@@ -1,5 +1,6 @@
 ﻿using Voyago.App.Contracts.Requests;
 using Voyago.App.Contracts.Responses;
+using Voyago.App.Contracts.ValueObjects;
 using Voyago.App.DataAccessLayer.Entities;
 using Voyago.App.DataAccessLayer.ValueObjects;
 using ContractValueObjects = Voyago.App.Contracts.ValueObjects;
@@ -31,6 +32,7 @@ public static class ContractMappings
     {
         return new TripResponse(
             Id: entity.Id,
+            Name: entity.Name,
             TripStatus: entity.TripStatus.MapToResponseTripStatus(),
             Budget: entity.Budget,
             From: entity.From,
@@ -45,12 +47,16 @@ public static class ContractMappings
             PlanningTasks: entity.Tasks.MapToPlanningTaskResponses()
             );
     }
-    public static IEnumerable<TripResponse> MapToResponses(this IEnumerable<Trip> entities, IEnumerable<TripUserRoles> tripUserRoles)
+    public static IEnumerable<TripResponse> MapToResponses(this IEnumerable<Trip> entities, Guid userId)
     {
         foreach (Trip entity in entities)
         {
-            TripUserRoles? tripUserRole = tripUserRoles.FirstOrDefault(tur => tur.TripId == entity.Id);
-            EntityValueObjects.TripRole role = tripUserRole?.Role ?? EntityValueObjects.TripRole.Member;
+            if (!entity.TripUsers.Any())
+            {
+                continue;
+            }
+            TripUserRoles? roleUser = entity.TripUsers.FirstOrDefault(tu => tu.UserId == userId);
+            EntityValueObjects.TripRole role = roleUser?.Role ?? EntityValueObjects.TripRole.Member;
             yield return entity.MapToResponse(role);
         }
     }
@@ -177,10 +183,11 @@ public static class ContractMappings
         return new()
         {
             Id = id,
+            Name = request.Name,
             Budget = request.Budget,
             From = request.From,
             To = request.To,
-            TripStatus = TripStatus.Pending
+            TripStatus = EntityValueObjects.TripStatus.Pending
         };
     }
     public static Trip MapToEntity(this UpdateTripRequest request, Guid id)
@@ -188,6 +195,7 @@ public static class ContractMappings
         return new()
         {
             Id = id,
+            Name = request.Name,
             Budget = request.Budget,
             From = request.From,
             To = request.To,
@@ -195,7 +203,7 @@ public static class ContractMappings
         };
     }
 
-    public static TripTask MapCreateRequestToEntity(this ITaskRequest request, Guid tripId, Guid taskId)
+    public static TripTask MapCreateRequestToEntity(this BaseTaskRequest request, Guid tripId, Guid taskId)
     {
         TripTask taskToReturn = new();
         switch (request.TaskType)
@@ -219,7 +227,7 @@ public static class ContractMappings
         return taskToReturn;
     }
 
-    public static TripTask MapUpdateRequestToEntity(this ITaskRequest request, Guid tripId)
+    public static TripTask MapUpdateRequestToEntity(this BaseTaskRequest request, Guid tripId)
     {
         TripTask taskToReturn = new();
         switch (request.TaskType)
@@ -285,6 +293,20 @@ public static class ContractMappings
         };
     }
 
+    public static TasksResponses MapToResponses(this IEnumerable<TripTask> tasks)
+    {
+        TasksResponses responses = new()
+        {
+            FlightTasks = tasks.MapToFlightTaskResponses(),
+            OtherTasks = tasks.MapToOtherTaskResponses(),
+            PlanningTasks = tasks.MapToPlanningTaskResponses(),
+            HotelTasks = tasks.MapToHotelTaskResponses()
+        };
+        responses.PlanningTasks = tasks.MapToPlanningTaskResponses();
+        return responses;
+    }
+
+
     private static GeneralBookingTask MapToEntity(this CreateGeneralTaskRequest request, Guid tripId, Guid taskId)
     {
         return new()
@@ -296,8 +318,8 @@ public static class ContractMappings
             Name = request.Name,
             Notes = request.Notes,
             TripId = tripId,
-            Status = StatusTask.Pending,
-            Type = TaskType.GeneralBooking
+            Status = EntityValueObjects.StatusTask.Pending,
+            Type = EntityValueObjects.TaskType.GeneralBooking
         };
     }
     private static FlightBookingTask MapToEntity(this CreateFlightTaskRequest request, Guid tripId, Guid taskId)
@@ -311,9 +333,9 @@ public static class ContractMappings
             DepartureDate = request.DepartureDate,
             MoneySpent = request.MoneySpent,
             ReturnDate = request.ReturnDate,
-            Status = StatusTask.Pending,
+            Status = EntityValueObjects.StatusTask.Pending,
             TripId = tripId,
-            Type = TaskType.TicketBooking
+            Type = EntityValueObjects.TaskType.TicketBooking
         };
     }
     private static HotelBookingTask MapToEntity(this CreateHotelTaskRequest request, Guid tripId, Guid taskId)
@@ -329,8 +351,8 @@ public static class ContractMappings
             ContactNo = request.ContactNo,
             MoneySpent = request.MoneySpent,
             TripId = tripId,
-            Status = StatusTask.Pending,
-            Type = TaskType.HotelBooking
+            Status = EntityValueObjects.StatusTask.Pending,
+            Type = EntityValueObjects.TaskType.HotelBooking
         };
     }
     private static OtherTask MapToEntity(this CreateOtherTaskRequest request, Guid tripId, Guid taskId)
@@ -343,8 +365,8 @@ public static class ContractMappings
             Name = request.Name,
             MoneySpent = request.MoneySpent,
             TripId = tripId,
-            Status = StatusTask.Pending,
-            Type = TaskType.Other
+            Status = EntityValueObjects.StatusTask.Pending,
+            Type = EntityValueObjects.TaskType.Other
         };
     }
     private static PlanningTask MapToEntity(this CreatePlanningTaskRequest request, Guid tripId, Guid taskId)
@@ -358,8 +380,8 @@ public static class ContractMappings
             MoneySpent = request.MoneySpent,
             Steps = request.Steps,
             TripId = tripId,
-            Status = StatusTask.Pending,
-            Type = TaskType.Planning
+            Status = EntityValueObjects.StatusTask.Pending,
+            Type = EntityValueObjects.TaskType.Planning
 
         };
     }
@@ -374,8 +396,8 @@ public static class ContractMappings
             Name = request.Name,
             Notes = request.Notes,
             TripId = tripId,
-            Status = StatusTask.Pending,
-            Type = TaskType.GeneralBooking
+            Status = EntityValueObjects.StatusTask.Pending,
+            Type = EntityValueObjects.TaskType.GeneralBooking
         };
     }
     private static FlightBookingTask MapToEntity(this UpdateFlightTaskRequest request, Guid tripId)
@@ -389,9 +411,9 @@ public static class ContractMappings
             DepartureDate = request.DepartureDate,
             MoneySpent = request.MoneySpent,
             ReturnDate = request.ReturnDate,
-            Status = StatusTask.Pending,
+            Status = EntityValueObjects.StatusTask.Pending,
             TripId = tripId,
-            Type = TaskType.TicketBooking
+            Type = EntityValueObjects.TaskType.TicketBooking
         };
     }
     private static HotelBookingTask MapToEntity(this UpdateHotelTaskRequest request, Guid tripId)
@@ -407,8 +429,8 @@ public static class ContractMappings
             ContactNo = request.ContactNo,
             MoneySpent = request.MoneySpent,
             TripId = tripId,
-            Status = StatusTask.Pending,
-            Type = TaskType.HotelBooking
+            Status = EntityValueObjects.StatusTask.Pending,
+            Type = EntityValueObjects.TaskType.HotelBooking
         };
     }
     private static OtherTask MapToEntity(this UpdateOtherTaskRequest request, Guid tripId)
@@ -421,8 +443,8 @@ public static class ContractMappings
             Name = request.Name,
             MoneySpent = request.MoneySpent,
             TripId = tripId,
-            Status = StatusTask.Pending,
-            Type = TaskType.Other
+            Status = EntityValueObjects.StatusTask.Pending,
+            Type = EntityValueObjects.TaskType.Other
         };
     }
     private static PlanningTask MapToEntity(this UpdatePlanningTaskRequest request, Guid tripId)
@@ -436,8 +458,8 @@ public static class ContractMappings
             MoneySpent = request.MoneySpent,
             Steps = request.Steps,
             TripId = tripId,
-            Status = StatusTask.Pending,
-            Type = TaskType.Planning
+            Status = EntityValueObjects.StatusTask.Pending,
+            Type = EntityValueObjects.TaskType.Planning
 
         };
     }

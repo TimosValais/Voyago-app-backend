@@ -13,11 +13,13 @@ internal static class ApiRoutes
         public const string Delete = $"{Base}/{{id}}";
         public const string GetTasks = $"{Base}/{{id}}/tasks";
         public const string GetTrips = $"{Base}/{{id}}/trips";
+        public const string GetUserId = $"{Base}/userid";
+        public const string PostProfilePicture = $"{Base}/{{id}}/profile-picture";
     }
 
     public static class TripRoutes
     {
-        private const string Base = $"{ApiBase}/trips";
+        public const string Base = $"{ApiBase}/trips";
         public const string GetAll = Base;
         public const string Get = $"{Base}/{{id}}";
         public const string Update = $"{Base}/{{id}}";
@@ -43,5 +45,6 @@ internal static class ApiRoutes
     {
         private const string Base = $"{ApiBase}/files";
         public const string Get = $"{Base}/{{fileId}}";
+        public const string PostFile = $"{Base}/{{id}}/file";
     }
 }

@@ -37,6 +37,20 @@ builder.Services.AddMassTransit(x =>
     });
 });
 #endregion
+
+#region CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policyBuilder =>
+    {
+        policyBuilder
+            .WithOrigins(config["Frontend:Url"]!)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
+#endregion
 WebApplication app = builder.Build();
 
 
@@ -46,6 +60,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors("FrontendPolicy");
 
 app.UseHttpsRedirection();
 

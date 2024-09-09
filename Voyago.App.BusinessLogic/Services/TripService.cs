@@ -31,7 +31,7 @@ public class TripService : ITripService
             {
                 throw new Exception("User not found!");
             }
-            Task<TripUserRoles?> userTripRole = _tripUserRoleRepository.GetByTripAndUserId(tripId, userId, cancellationToken);
+            TripUserRoles? userTripRole = await _tripUserRoleRepository.GetByTripAndUserId(tripId, userId, cancellationToken);
             if (userTripRole == null)
             {
                 return await _tripUserRoleRepository.InsertAsync(new()

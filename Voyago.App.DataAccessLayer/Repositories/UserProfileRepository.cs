@@ -132,4 +132,37 @@ public class UserProfileRepository : IUserProfileRepository
         using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
         return await connection.QueryAsync<UserProfile>(sql, new { TripId = tripId });
     }
+
+    public async Task<UserProfile?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            SELECT 
+                Id, 
+                Email, 
+                Name, 
+                ProfilePictureUrl
+            FROM UserProfile
+            WHERE Name = @Name;
+        "
+        ;
+
+        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        return await connection.QueryFirstOrDefaultAsync<UserProfile>(sql, new { Name = username });
+    }
+
+    public async Task<UserProfile?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            SELECT 
+                Id, 
+                Email, 
+                Name, 
+                ProfilePictureUrl
+            FROM UserProfile
+            WHERE Email = @Email;
+        ";
+
+        using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        return await connection.QueryFirstOrDefaultAsync<UserProfile>(sql, new { Email = email });
+    }
 }

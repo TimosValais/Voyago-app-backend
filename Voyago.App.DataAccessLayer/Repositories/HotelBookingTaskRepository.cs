@@ -102,7 +102,7 @@ public class HotelBookingTaskRepository : IHotelBookingTaskRepository
         ";
 
         using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
-        Dictionary<Guid, HotelBookingTask> taskDictionary = new();
+        Dictionary<Guid, HotelBookingTask> taskDictionary = [];
 
         IEnumerable<HotelBookingTask> tasks = await connection.QueryAsync<HotelBookingTask, UserProfile, HotelBookingTask>(
             sql,
@@ -117,7 +117,7 @@ public class HotelBookingTaskRepository : IHotelBookingTaskRepository
 
                 if (user != null)
                 {
-                    ((List<UserProfile>)currentTask.Users).Add(user);
+                    currentTask.Users.Add(user);
                 }
 
                 return currentTask;
@@ -153,7 +153,7 @@ public class HotelBookingTaskRepository : IHotelBookingTaskRepository
 
                 if (user != null)
                 {
-                    ((List<UserProfile>)task.Users).Add(user);
+                    task.Users.Add(user);
                 }
 
                 return task;
@@ -176,7 +176,7 @@ public class HotelBookingTaskRepository : IHotelBookingTaskRepository
         ";
 
         using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
-        Dictionary<Guid, HotelBookingTask> taskDictionary = new();
+        Dictionary<Guid, HotelBookingTask> taskDictionary = [];
 
         IEnumerable<HotelBookingTask> tasks = await connection.QueryAsync<HotelBookingTask, UserProfile, HotelBookingTask>(
             sql,
@@ -191,7 +191,7 @@ public class HotelBookingTaskRepository : IHotelBookingTaskRepository
 
                 if (user != null)
                 {
-                    ((List<UserProfile>)currentTask.Users).Add(user);
+                    currentTask.Users.Add(user);
                 }
 
                 return currentTask;
@@ -214,7 +214,7 @@ public class HotelBookingTaskRepository : IHotelBookingTaskRepository
         ";
 
         using IDbConnection connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
-        Dictionary<Guid, HotelBookingTask> taskDictionary = new();
+        Dictionary<Guid, HotelBookingTask> taskDictionary = [];
 
         IEnumerable<HotelBookingTask> tasks = await connection.QueryAsync<HotelBookingTask, UserProfile, HotelBookingTask>(
             sql,
@@ -229,7 +229,7 @@ public class HotelBookingTaskRepository : IHotelBookingTaskRepository
 
                 if (user != null)
                 {
-                    ((List<UserProfile>)currentTask.Users).Add(user);
+                    currentTask.Users.Add(user);
                 }
 
                 return currentTask;

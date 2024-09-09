@@ -1,13 +1,9 @@
 ﻿using Voyago.App.Contracts.ValueObjects;
 
 namespace Voyago.App.Contracts.Requests;
-public record CreateGeneralTaskRequest(
-        IEnumerable<string> Notes,
-        DateTime DeadLine,
-        string? Description,
-        string Name,
-        decimal MoneySpent,
-        IEnumerable<byte[]> Documents) : ITaskRequest
+public class CreateGeneralTaskRequest : BaseTaskRequest
 {
-    public TaskType TaskType => TaskType.GeneralBooking;
-};
+    public override TaskType TaskType => TaskType.GeneralBooking;
+
+    public IEnumerable<string> Notes { get; set; } = [];
+}

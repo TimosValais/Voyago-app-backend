@@ -22,7 +22,7 @@ public class DbInitializer : IDbInitializer
     {
         string sql = @"
         CREATE TABLE IF NOT EXISTS User (
-            Id CHAR(36) PRIMARY KEY,
+            Id NVARCHAR(36) PRIMARY KEY,
             Username TEXT NOT NULL,
             Email TEXT NOT NULL,
             PasswordHash TEXT NOT NULL

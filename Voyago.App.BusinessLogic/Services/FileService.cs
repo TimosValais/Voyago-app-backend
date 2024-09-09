@@ -1,7 +1,9 @@
 ﻿using MassTransit;
 using Minio;
 using Minio.DataModel.Args;
+using Minio.DataModel.Response;
 using Minio.Exceptions;
+using System.Reactive.Linq;
 using Voyago.App.BusinessLogic.Mappings;
 using Voyago.App.Contracts.Messages;
 using Voyago.App.DataAccessLayer.Repositories;
@@ -17,7 +19,7 @@ public class FileService : IFileService, IConsumer<UserProfilePictureUpdateMessa
     private readonly IOtherTaskRepository _otherTaskRepository;
     private readonly IPlanningTaskRepository _planningTaskRepository;
     private readonly IUserProfileRepository _userProfileRepository;
-    private const string BucketName = "your-bucket-name"; // Replace with your bucket name
+    private const string BucketName = "files-bucket"; // Replace with your bucket name
 
     public FileService(IMinioClient fileClient,
                        IFlightBookingTaskRepository flightBookingTaskRepository,
@@ -107,6 +109,8 @@ public class FileService : IFileService, IConsumer<UserProfilePictureUpdateMessa
         UserProfilePictureUpdateMessage message = context.Message;
         string contentType = DetermineContentType(message.ProfilePicture);
         string fileId = await SaveFileToMinio(message.ProfilePicture, message.UserId.ToString(), contentType);
+
+        Minio.DataModel.Result.ListAllMyBucketsResult buckets = await _fileClient.ListBucketsAsync();
         if (string.IsNullOrEmpty(fileId))
         {
             return;
@@ -125,15 +129,33 @@ public class FileService : IFileService, IConsumer<UserProfilePictureUpdateMessa
     {
         try
         {
+            BucketExistsArgs beArgs = new BucketExistsArgs().WithBucket(BucketName);
+            bool found = await _fileClient.BucketExistsAsync(beArgs);
+
+            try
+            {
+                MakeBucketArgs mbArgs = new MakeBucketArgs().WithBucket(BucketName);
+                await _fileClient.MakeBucketAsync(mbArgs);
+            }
+            catch (Exception)
+            {
+            }
+
+            if (!found)
+            {
+                MakeBucketArgs mbArgs = new MakeBucketArgs().WithBucket(BucketName);
+                await _fileClient.MakeBucketAsync(mbArgs);
+            }
+
             string objectName = Guid.NewGuid().ToString();
             using MemoryStream stream = new(fileBytes);
 
-            await _fileClient.PutObjectAsync(new PutObjectArgs()
+            PutObjectResponse response = await _fileClient.PutObjectAsync(new PutObjectArgs()
                 .WithBucket(BucketName)
                 .WithObject(objectName)
                 .WithStreamData(stream)
                 .WithObjectSize(stream.Length)
-                .WithContentType(contentType));
+                .WithContentType("application/octet-stream"));
 
             return objectName;
         }
@@ -154,18 +176,34 @@ public class FileService : IFileService, IConsumer<UserProfilePictureUpdateMessa
         try
         {
             using MemoryStream memoryStream = new();
-            await _fileClient.GetObjectAsync(new GetObjectArgs()
+
+            // Define arguments to get the object from MinIO
+            GetObjectArgs args = new GetObjectArgs()
                 .WithBucket(BucketName)
                 .WithObject(fileId)
-                .WithCallbackStream(stream => stream.CopyTo(memoryStream))
-                , cancellationToken);
+                .WithCallbackStream(stream =>
+                {
+                    // Copy the stream to the memoryStream to retrieve the file bytes
+                    stream.CopyTo(memoryStream);
+                });
+
+            // Execute the get object operation
+            await _fileClient.GetObjectAsync(args, cancellationToken);
+
+            // Convert the stream to byte array
             byte[] fileBytes = memoryStream.ToArray();
+
+            // Determine the content type of the retrieved file
             string contentType = DetermineContentType(fileBytes);
+
+            // Validate the retrieved bytes and content type
             if (fileBytes.Length == 0 || string.IsNullOrWhiteSpace(contentType))
             {
+                Console.WriteLine("Failed to retrieve the correct file bytes or determine content type.");
                 return null;
             }
-            return new(memoryStream.ToArray(), contentType);
+
+            return (fileBytes, contentType);
         }
         catch (MinioException ex)
         {
@@ -178,6 +216,7 @@ public class FileService : IFileService, IConsumer<UserProfilePictureUpdateMessa
             return null;
         }
     }
+
 
     private string DetermineContentType(byte[] fileBytes)
     {
@@ -210,4 +249,6 @@ public class FileService : IFileService, IConsumer<UserProfilePictureUpdateMessa
         }
         return "application/octet-stream";
     }
+
 }
+

@@ -10,6 +10,7 @@ public static class DependencyInjection
         services.AddTransient<ITripTaskService, TripTaskService>();
         services.AddTransient<IUserProfileService, UserProfileService>();
         services.AddTransient<ITripUserRolesService, TripUserRolesService>();
+        services.AddTransient<IFileService, FileService>();
         return services;
     }
 }

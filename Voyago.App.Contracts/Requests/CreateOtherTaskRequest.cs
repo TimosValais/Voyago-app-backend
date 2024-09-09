@@ -2,12 +2,8 @@
 
 namespace Voyago.App.Contracts.Requests;
 
-public record CreateOtherTaskRequest(
-    DateTime DeadLine,
-    string? Description,
-    string Name,
-    decimal MoneySpent,
-    IEnumerable<byte[]> Documents) : ITaskRequest
+public class CreateOtherTaskRequest : BaseTaskRequest
 {
-    public TaskType TaskType => TaskType.Other;
-};
+    public override TaskType TaskType => TaskType.Other;
+
+}

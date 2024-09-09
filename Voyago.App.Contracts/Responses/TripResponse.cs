@@ -4,6 +4,7 @@ namespace Voyago.App.Contracts.Responses;
 public record TripResponse
     (
         Guid Id, TripStatus TripStatus,
+        string Name,
         decimal Budget,
         DateTime From,
         DateTime To,

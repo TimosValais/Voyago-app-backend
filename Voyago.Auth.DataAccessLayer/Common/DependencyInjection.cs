@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Dapper;
+using Microsoft.Extensions.DependencyInjection;
 using Voyago.Auth.DataAccessLayer.Extensions;
 using Voyago.Auth.DataAccessLayer.Repositories;
 
@@ -7,6 +8,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddDALServices(this IServiceCollection services, string connectionString)
     {
+        SqlMapper.AddTypeHandler(new GuidTypeHandler());
         services.AddSingleton<IDbInitializer, DbInitializer>();
         services.AddSingleton<IDbConnectionFactory>(_ => new MySqlConnectionFactory(connectionString));
         services.AddScoped<IUserRepository, UserRepository>();

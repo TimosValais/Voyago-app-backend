@@ -10,6 +10,7 @@ public static class DependencyInjection
     {
         //adding handler to make lists of string to json in the db
         SqlMapper.AddTypeHandler(new JsonListStringTypeHandler());
+        SqlMapper.AddTypeHandler(new GuidTypeHandler());
         services.AddSingleton<IDbConnectionFactory>(_ => new MySqlConnectionFactory(connectionString));
         services.AddSingleton<IDbInitializer, DbInitializer>();
         services.AddScoped<IGeneralBookingTaskRepository, GeneralBookingTaskRepository>();

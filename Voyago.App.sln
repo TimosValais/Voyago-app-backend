@@ -15,11 +15,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voyago.App.DataAccessLayer"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voyago.App.Contracts", "Voyago.App.Contracts\Voyago.App.Contracts.csproj", "{47E9B6F2-C901-4A1B-8F34-5280C2A4636D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voyago.Auth.API", "Voyago.Auth.API\Voyago.Auth.API.csproj", "{C2AF81B8-550C-4FA4-8AA1-62402B75D3AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voyago.Auth.API", "Voyago.Auth.API\Voyago.Auth.API.csproj", "{C2AF81B8-550C-4FA4-8AA1-62402B75D3AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voyago.Auth.DataAccessLayer", "Voyago.Auth.DataAccessLayer\Voyago.Auth.DataAccessLayer.csproj", "{95CC110E-1CED-4504-AD12-08FEC21222A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voyago.Auth.DataAccessLayer", "Voyago.Auth.DataAccessLayer\Voyago.Auth.DataAccessLayer.csproj", "{95CC110E-1CED-4504-AD12-08FEC21222A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voyago.Auth.BusinessLogic", "Voyago.Auth.BusinessLogic\Voyago.Auth.BusinessLogic.csproj", "{D2F781F3-97A2-4EB6-B18C-BBF89561C97C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voyago.Auth.BusinessLogic", "Voyago.Auth.BusinessLogic\Voyago.Auth.BusinessLogic.csproj", "{D2F781F3-97A2-4EB6-B18C-BBF89561C97C}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{D2F16670-946B-457D-B52E-E52CD2AB0FE9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +57,10 @@ Global
 		{D2F781F3-97A2-4EB6-B18C-BBF89561C97C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2F781F3-97A2-4EB6-B18C-BBF89561C97C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2F781F3-97A2-4EB6-B18C-BBF89561C97C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2F16670-946B-457D-B52E-E52CD2AB0FE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2F16670-946B-457D-B52E-E52CD2AB0FE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2F16670-946B-457D-B52E-E52CD2AB0FE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2F16670-946B-457D-B52E-E52CD2AB0FE9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

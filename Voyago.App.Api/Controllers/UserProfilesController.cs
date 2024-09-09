@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Voyago.App.Api.Constants;
+using Voyago.App.Api.Extensions;
 using Voyago.App.Api.Mappings;
 using Voyago.App.BusinessLogic.Services;
 using Voyago.App.Contracts.Messages;
@@ -12,7 +13,6 @@ using Voyago.App.DataAccessLayer.ValueObjects;
 namespace Voyago.App.Api.Controllers;
 
 [ApiController]
-[Route(ApiRoutes.UserProfileRoutes.GetAll)]
 [Authorize]
 public class UserProfileController : ControllerBase
 {
@@ -35,7 +35,7 @@ public class UserProfileController : ControllerBase
         _publishEndpoint = publishEndpoint;
     }
 
-    [HttpGet]
+    [HttpGet(ApiRoutes.UserProfileRoutes.GetAll)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         IEnumerable<UserProfile> userProfiles = await _userProfileService.GetAllAsync(cancellationToken);
@@ -66,10 +66,6 @@ public class UserProfileController : ControllerBase
         else
         {
             await _publishEndpoint.Publish<UserUpdateMessage>(new(updatedUserProfile.Name, updatedUserProfile.Email, updatedUserProfile.Id));
-            if (request.ProfilePicture is not null)
-            {
-                await _publishEndpoint.Publish<UserProfilePictureUpdateMessage>(new(request.ProfilePicture, id));
-            }
         }
         return NoContent();
     }
@@ -88,14 +84,29 @@ public class UserProfileController : ControllerBase
     public async Task<IActionResult> GetTasks([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         IEnumerable<TripTask> tasks = await _tripTaskService.GetAllByUserIdAsync(id, cancellationToken);
-        return Ok(tasks);
+        return Ok(tasks.MapToResponses());
     }
 
     [HttpGet(ApiRoutes.UserProfileRoutes.GetTrips)]
     public async Task<IActionResult> GetTrips([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         IEnumerable<Trip> trips = await _tripService.GetByUserIdAsync(id, cancellationToken);
-        IEnumerable<TripUserRoles> tripUserRoles = await _tripUserRolesService.GetByUserId(id, cancellationToken);
-        return Ok(trips.MapToResponses(tripUserRoles));
+        return Ok(trips.MapToResponses(id));
+    }
+    [HttpGet(ApiRoutes.UserProfileRoutes.GetUserId)]
+    public async Task<IActionResult> GetUserId()
+    {
+        Guid? userId = HttpContext.GetUserId();
+        if (userId is null) return NotFound();
+        return Ok(userId);
+    }
+    [HttpPost(ApiRoutes.UserProfileRoutes.PostProfilePicture)]
+    public async Task<IActionResult> UpdateProfilePicture([FromRoute] Guid id, IFormFile picture)
+    {
+        using MemoryStream ms = new();
+        picture.CopyTo(ms);
+        byte[] fileBytes = ms.ToArray();
+        await _publishEndpoint.Publish<UserProfilePictureUpdateMessage>(new(fileBytes, id));
+        return Accepted();
     }
 }

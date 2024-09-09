@@ -3,26 +3,22 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Voyago.App.Api.Constants;
 using Voyago.App.Api.Extensions;
-using Voyago.App.Api.Helpers;
 using Voyago.App.Api.Mappings;
 using Voyago.App.BusinessLogic.Services;
-using Voyago.App.Contracts.Messages;
 using Voyago.App.Contracts.Requests;
+using Voyago.App.Contracts.ValueObjects;
 using Voyago.App.DataAccessLayer.Entities;
 using Voyago.App.DataAccessLayer.ValueObjects;
 using ContractValueObjects = Voyago.App.Contracts.ValueObjects;
 using EntityValueObjects = Voyago.App.DataAccessLayer.ValueObjects;
-
 namespace Voyago.App.Api.Controllers;
 
 [ApiController]
-[Route(ApiRoutes.TripRoutes.GetAll)]
 [Authorize]
 public class TripsController : ControllerBase
 {
     private readonly ITripService _tripService;
     private readonly ITripTaskService _tripTaskService;
-    private readonly IPublishEndpoint _publishEndpoint;
 
     public TripsController(ITripService tripService,
                            ITripTaskService tripTaskService,
@@ -30,10 +26,9 @@ public class TripsController : ControllerBase
     {
         _tripService = tripService;
         _tripTaskService = tripTaskService;
-        _publishEndpoint = publishEndpoint;
     }
 
-    [HttpGet]
+    [HttpGet(ApiRoutes.TripRoutes.GetAll)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         Guid? userId = HttpContext.GetUserId();
@@ -64,7 +59,7 @@ public class TripsController : ControllerBase
         if (!success) return BadRequest(new { Message = "Could not create the trip." });
         else
         {
-            await _tripService.UpsertUser((Guid)userId, tripId, TripRole.Admin, cancellationToken);
+            await _tripService.UpsertUser((Guid)userId, tripId, EntityValueObjects.TripRole.Admin, cancellationToken);
         }
         return Created();
     }
@@ -93,13 +88,20 @@ public class TripsController : ControllerBase
     public async Task<IActionResult> GetTasks([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         IEnumerable<TripTask> tasks = await _tripTaskService.GetAllByTripIdAsync(id, cancellationToken);
-        return Ok(tasks);
+        return Ok(tasks.MapToResponses());
     }
 
     [HttpPost(ApiRoutes.TripRoutes.PostTask)]
-    public async Task<IActionResult> AddTask([FromRoute] Guid id, [FromBody] ITaskRequest task, CancellationToken cancellationToken)
+    public async Task<IActionResult> AddTask([FromRoute] Guid id, CancellationToken cancellationToken)
     {
+
         if (!await HasManagerRights(id, cancellationToken)) return Unauthorized();
+        BaseTaskRequest? task = HttpContext.GetTaskRequestFromContext();
+        if (task is null)
+        {
+            return Problem("Couldn't deserialize task");
+        }
+
         Guid? userId = HttpContext.GetUserId();
         if (userId == null) return Unauthorized();
         Guid taskId = Guid.NewGuid();
@@ -108,36 +110,21 @@ public class TripsController : ControllerBase
         else
         {
             await _tripTaskService.AddUser((Guid)userId, taskId, task.TaskType.MapToEntity());
-            IEnumerable<byte[]>? documents = TaskHelpers.GetCreateTaskDocuments(task);
-            if (documents is not null && documents.Any())
-            {
-                foreach (byte[] document in documents)
-                {
-                    await _publishEndpoint.Publish(new TaskFileUpdateMessage(id, document, task.TaskType));
-                }
-            }
         }
         return CreatedAtAction(nameof(GetTasks), new { id }, task);
     }
 
     [HttpPut(ApiRoutes.TripRoutes.UpdateTask)]
-    public async Task<IActionResult> UpdateTask([FromRoute] Guid id, [FromBody] ITaskRequest task, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateTask([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         if (!await HasManagerRights(id, cancellationToken)) return Unauthorized();
-
+        BaseTaskRequest? task = HttpContext.GetTaskRequestFromContext();
+        if (task is null)
+        {
+            return Problem("Couldn't deserialize task");
+        }
         bool success = await _tripTaskService.UpsertAsync(task.MapUpdateRequestToEntity(id), cancellationToken);
         if (!success) return BadRequest(new { Message = "Could not update the task." });
-        else
-        {
-            IEnumerable<byte[]>? documents = TaskHelpers.GetUpdateTaskDocuments(task);
-            if (documents is not null && documents.Any())
-            {
-                foreach (byte[] document in documents)
-                {
-                    await _publishEndpoint.Publish(new TaskFileUpdateMessage(id, document, task.TaskType));
-                }
-            }
-        }
         return NoContent();
     }
 

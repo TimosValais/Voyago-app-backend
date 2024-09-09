@@ -1,14 +1,11 @@
 ﻿using Voyago.App.Contracts.ValueObjects;
 
 namespace Voyago.App.Contracts.Requests;
-public record UpdateGeneralTaskRequest(
-        Guid Id,
-        IEnumerable<string> Notes,
-        DateTime DeadLine,
-        string? Description,
-        string Name,
-        decimal MoneySpent,
-        IEnumerable<byte[]> Documents) : ITaskRequest
+
+public class UpdateGeneralTaskRequest : BaseTaskRequest
 {
-    public TaskType TaskType => TaskType.GeneralBooking;
-};
+    public override TaskType TaskType => TaskType.GeneralBooking;
+
+    public Guid Id { get; set; }
+    public IEnumerable<string> Notes { get; set; } = [];
+}

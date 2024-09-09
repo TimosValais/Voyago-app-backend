@@ -30,7 +30,7 @@ public class DbInitializer : IDbInitializer
     {
         string sql = @"
         CREATE TABLE IF NOT EXISTS UserProfile (
-            Id CHAR(36) PRIMARY KEY,  
+            Id NVARCHAR(36) PRIMARY KEY,  
             Email TEXT NOT NULL,
             Name TEXT,
             ProfilePictureUrl TEXT
@@ -43,7 +43,8 @@ public class DbInitializer : IDbInitializer
     {
         string sql = @"
         CREATE TABLE IF NOT EXISTS Trip (
-            Id CHAR(36) PRIMARY KEY,  
+            Id NVARCHAR(36) PRIMARY KEY, 
+            Name NVARCHAR(50) NOT NULL,
             Budget DECIMAL NOT NULL,
             TripStatus INTEGER NOT NULL,
             `From` DATETIME NOT NULL,
@@ -57,8 +58,8 @@ public class DbInitializer : IDbInitializer
     {
         string sql = @"
         CREATE TABLE IF NOT EXISTS TripUserRoles (
-            UserId CHAR(36) NOT NULL,
-            TripId CHAR(36) NOT NULL,
+            UserId NVARCHAR(36) NOT NULL,
+            TripId NVARCHAR(36) NOT NULL,
             Role INTEGER NOT NULL,
             PRIMARY KEY (UserId, TripId),
             FOREIGN KEY (UserId) REFERENCES UserProfile(Id),
@@ -72,8 +73,8 @@ public class DbInitializer : IDbInitializer
     {
         string sql = @"
         CREATE TABLE IF NOT EXISTS FlightBookingTask (
-            Id CHAR(36) PRIMARY KEY,  
-            TripId CHAR(36) NOT NULL,
+            Id NVARCHAR(36) PRIMARY KEY,  
+            TripId NVARCHAR(36) NOT NULL,
             Type INTEGER NOT NULL,
             Status INTEGER NOT NULL,
             Deadline DATETIME NOT NULL,
@@ -93,8 +94,8 @@ public class DbInitializer : IDbInitializer
     {
         string sql = @"
         CREATE TABLE IF NOT EXISTS GeneralBookingTask (
-            Id CHAR(36) PRIMARY KEY,  
-            TripId CHAR(36) NOT NULL,
+            Id NVARCHAR(36) PRIMARY KEY,  
+            TripId NVARCHAR(36) NOT NULL,
             Type INTEGER NOT NULL,
             Status INTEGER NOT NULL,
             Deadline DATETIME NOT NULL,
@@ -113,8 +114,8 @@ public class DbInitializer : IDbInitializer
     {
         string sql = @"
         CREATE TABLE IF NOT EXISTS HotelBookingTask (
-            Id CHAR(36) PRIMARY KEY,  
-            TripId CHAR(36) NOT NULL,
+            Id NVARCHAR(36) PRIMARY KEY,  
+            TripId NVARCHAR(36) NOT NULL,
             Type INTEGER NOT NULL,
             Status INTEGER NOT NULL,
             Deadline DATETIME,
@@ -135,8 +136,8 @@ public class DbInitializer : IDbInitializer
     {
         string sql = @"
         CREATE TABLE IF NOT EXISTS OtherTask (
-            Id CHAR(36) PRIMARY KEY,  
-            TripId CHAR(36) NOT NULL,
+            Id NVARCHAR(36) PRIMARY KEY,  
+            TripId NVARCHAR(36) NOT NULL,
             Type INTEGER NOT NULL,
             Status INTEGER NOT NULL,
             Deadline DATETIME NOT NULL,
@@ -154,8 +155,8 @@ public class DbInitializer : IDbInitializer
     {
         string sql = @"
         CREATE TABLE IF NOT EXISTS PlanningTask (
-            Id CHAR(36) PRIMARY KEY,  
-            TripId CHAR(36) NOT NULL,
+            Id NVARCHAR(36) PRIMARY KEY,  
+            TripId NVARCHAR(36) NOT NULL,
             Type INTEGER NOT NULL,
             Status INTEGER NOT NULL,
             Deadline DATETIME NOT NULL,
@@ -174,11 +175,10 @@ public class DbInitializer : IDbInitializer
     {
         string sql = @"
         CREATE TABLE IF NOT EXISTS TaskUser (
-            UserId CHAR(36) NOT NULL,
-            TaskId CHAR(36) NOT NULL,
+            UserId NVARCHAR(36) NOT NULL,
+            TaskId NVARCHAR(36) NOT NULL,
             PRIMARY KEY (UserId, TaskId),
-            FOREIGN KEY (UserId) REFERENCES UserProfile(Id),
-            FOREIGN KEY (TaskId) REFERENCES FlightBookingTask(Id) -- Assuming this references tasks
+            FOREIGN KEY (UserId) REFERENCES UserProfile(Id)
         );
     ";
         await connection.ExecuteAsync(sql);

@@ -4,7 +4,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Minio;
 using System.Text;
+using Voyago.App.Api.Extensions;
 using Voyago.App.BusinessLogic;
+using Voyago.App.BusinessLogic.Exceptions;
 using Voyago.App.BusinessLogic.Extensions;
 using Voyago.App.DataAccessLayer.Common;
 using Voyago.App.DataAccessLayer.Extensions;
@@ -14,6 +16,12 @@ ConfigurationManager config = builder.Configuration;
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+#region Logging
+//builder.Logging.ClearProviders();
+//builder.Logging.AddJsonConsole();
+
+#endregion
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -65,17 +73,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 #endregion
 #region Minio
-builder.Services.AddSingleton<IMinioClient>(sp =>
+
+
+builder.Services.AddMinio(opts =>
 {
     string endpoint = config["Minio:Endpoint"]!;
     string accessKey = config["Minio:AccessKey"]!;
     string secretKey = config["Minio:SecretKey"]!;
-
-    return new MinioClient()
-        .WithEndpoint(endpoint)
-        .WithCredentials(accessKey, secretKey)
-        .WithSSL(); // Enable SSL if using HTTPS
+    opts.WithEndpoint(endpoint)
+        .WithCredentials(accessKey, secretKey);
 });
+//builder.Services.AddSingleton(sp =>
+//{
+
+
+//    return new MinioClient()
+//        .WithEndpoint(endpoint)
+//        .WithCredentials(accessKey, secretKey);
+//    //.WithSSL(); // Enable SSL if using HTTPS
+//});
 #endregion
 
 #region MassTransit
@@ -96,14 +112,28 @@ builder.Services.AddMassTransit(x =>
     });
 });
 #endregion
+
+#region CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policyBuilder =>
+    {
+        policyBuilder
+            .WithOrigins(config["Frontend:Url"]!)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
+#endregion
 WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseCors("FrontendPolicy");
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
@@ -116,6 +146,12 @@ app.Use(async (context, next) =>
     {
         await next(); // Continue processing the request
     }
+    catch (ConfictException conEx)
+    {
+        context.Response.StatusCode = 409; // Conflict status code
+        context.Response.ContentType = "text/plain";
+        await context.Response.WriteAsync($"Conflict occurred: {conEx.Message}");
+    }
     catch (Exception ex)
     {
 
@@ -124,12 +160,22 @@ app.Use(async (context, next) =>
         await context.Response.WriteAsync($"An error occurred: {ex.Message}");
     }
 });
+app.UseTaskRequestMiddleware();
 app.MapControllers();
 
 #region DB Initialization 
 
 IDbInitializer dbInitializer = app.Services.GetRequiredService<IDbInitializer>();
-await dbInitializer.InitializeAsync();
+
+
+try
+{
+    await dbInitializer.InitializeAsync();
+
+}
+catch (Exception)
+{
+}
 #endregion
 
 app.Run();

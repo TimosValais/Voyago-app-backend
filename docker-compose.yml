@@ -1,0 +1,69 @@
+version: '3.4'
+
+services:
+  voyago.app.api:
+    image: ${DOCKER_REGISTRY-}voyagoappapi
+    build:
+      context: .
+      dockerfile: Voyago.App.Api/Dockerfile
+    depends_on:
+      - mysql
+      - rabbitmq
+      - minio
+
+  voyago.auth.api:
+    image: ${DOCKER_REGISTRY-}voyagoauthapi
+    build:
+      context: .
+      dockerfile: Voyago.Auth.API/Dockerfile
+    depends_on:
+      - mysql
+      - rabbitmq
+      - minio
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword 
+      MYSQL_DATABASE: voyago
+      MYSQL_USER: voyagouser
+      MYSQL_PASSWORD: voyagopassword 
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672" 
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmqpassword 
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadminpassword 
+    ports:
+      - "9000:9000"
+      - "9001:9001" 
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+volumes:
+  mysql_data:
+  minio_data:
